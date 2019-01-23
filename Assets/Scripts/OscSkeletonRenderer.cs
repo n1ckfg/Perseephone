@@ -5,13 +5,10 @@ using System;
 using System.Net;
 using System.Collections;
 using System.Text;
-using UnityOSC;
 
 public class OscSkeletonRenderer : MonoBehaviour
 {
-    public string outIP = "127.0.0.1";
-    public int outPort = 7110;
-    private OSCServer myServer;
+    public OSC osc;
 
     private long _lastFrameIndex = -1;
 
@@ -45,9 +42,6 @@ public class OscSkeletonRenderer : MonoBehaviour
     {
         _bodySkeletons = new Dictionary<int, GameObject[]>();
         _bodies = new Astra.Body[Astra.BodyFrame.MaxBodies];
-
-        OSCHandler.Instance.Init();
-        OSCHandler.Instance.CreateClient("myClient", IPAddress.Parse(outIP), outPort);
     }
 
     public void OnNewFrame(Astra.BodyStream bodyStream, Astra.BodyFrame frame)
@@ -118,14 +112,14 @@ public class OscSkeletonRenderer : MonoBehaviour
                                     bodyJoint.WorldPosition.Z / 1000f);
 
                     // ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
-                    OSCMessage msg = new OSCMessage("/joint");
-                    //msg.Append(bodyJoint.Type.ToString());
-                    //msg.Append((int) body.Id);
-                    //msg.Append(skeletonJoint.transform.localPosition.x);
-                    //msg.Append(skeletonJoint.transform.localPosition.y);
-                    //msg.Append(skeletonJoint.transform.localPosition.z);
-
-                    //OSCHandler.Instance.SendMessageToClient("myClient", msg.Address, msg);
+                    OscMessage msg = new OscMessage();
+                    msg.address = "/joint";
+                    msg.values.Add(bodyJoint.Type.ToString().ToLower());
+                    msg.values.Add((int) body.Id);
+                    msg.values.Add(skeletonJoint.transform.localPosition.x);
+                    msg.values.Add(skeletonJoint.transform.localPosition.y);
+                    msg.values.Add(skeletonJoint.transform.localPosition.z);
+                    osc.Send(msg);
                     // ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
 
                     // The original Osceleton didn't use rotation, but it can be calculated here
