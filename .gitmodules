@@ -1,3 +1,6 @@
 [submodule "Assets/UnityOSC"]
 	path = Assets/UnityOSC
 	url = https://github.com/n1ckfg/UnityOSC
+[submodule "Assets/AstraUnity"]
+	path = Assets/AstraUnity
+	url = https://github.com/n1ckfg/AstraUnity
