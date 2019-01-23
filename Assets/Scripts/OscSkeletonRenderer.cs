@@ -109,8 +109,8 @@ public class OscSkeletonRenderer : MonoBehaviour
                     // the Astra SDK uses a different vector class than Unity
                     Vector3 pos = new Vector3(bodyJoint.WorldPosition.X, bodyJoint.WorldPosition.Y, bodyJoint.WorldPosition.Z);
                     skeletonJoint.transform.localPosition = pos / 1000f;
-                    float x = remap(pos.x, -640f, 640f, 0f, 640f);
-                    float y = Mathf.Abs(480f - remap(pos.y, -480f, 480f, 0f, 480f));
+                    float x = pos.x; // remap(pos.x, -640f, 640f, 0f, 640f);
+                    float y = pos.y; // remap(pos.y, -480f, 480f, 0f, 480f);
                     float z = pos.z;
                     Debug.Log(x + ", " + y + ", " + z);
                     // ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
