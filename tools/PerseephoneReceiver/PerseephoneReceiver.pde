@@ -36,7 +36,7 @@ void oscEvent(OscMessage msg) {
   println(msg);
   if (msg.checkAddrPattern("/joint") && msg.checkTypetag("sifff")) {
     for (int i=0;i<osceletonNames.length;i++) {
-      //if (msg.get(0).stringValue().equals(osceletonNames[i])) {
+      if (msg.get(0).stringValue().equals(osceletonNames[i])) {
         Joint joint = joints.get(i);
         float x = msg.get(2).floatValue();
         float y = msg.get(3).floatValue();
@@ -44,7 +44,7 @@ void oscEvent(OscMessage msg) {
         joint.co = new PVector(x, y, z).mult(scaler);
         joint.co.x += width/2;
         println(joint.co);
-      //}
+      }
     }
   }
 }

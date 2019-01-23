@@ -9,17 +9,11 @@ using System.Text;
 public class OscSkeletonRenderer : MonoBehaviour
 {
     public OSC osc;
-
-    private long _lastFrameIndex = -1;
-
-    public Astra.Body[] _bodies;
-    private Dictionary<int, GameObject[]> _bodySkeletons;
-
-    private readonly Vector3 NormalPoseScale = new Vector3(1, 1, 1);
-    private readonly Vector3 GripPoseScale = new Vector3(0.5f, 0.5f, 0.5f);
+    public float scaler = 0.001f;
 
     public GameObject JointPrefab;
     public Transform JointRoot;
+    public Astra.Body[] _bodies;
 
     public Toggle ToggleSeg = null;
     public Toggle ToggleSegBody = null;
@@ -33,6 +27,12 @@ public class OscSkeletonRenderer : MonoBehaviour
     public Toggle ToggleOptimizationBalanced = null;
     public Toggle ToggleOptimizationMemory = null;
     public Slider SliderOptimization = null;
+
+    private Dictionary<int, GameObject[]> _bodySkeletons;
+    private long _lastFrameIndex = -1;
+
+    private readonly Vector3 NormalPoseScale = new Vector3(1, 1, 1);
+    private readonly Vector3 GripPoseScale = new Vector3(0.5f, 0.5f, 0.5f);
 
     private Astra.BodyTrackingFeatures _previousTargetFeatures = Astra.BodyTrackingFeatures.HandPose;
     private Astra.SkeletonProfile _previousSkeletonProfile = Astra.SkeletonProfile.Full;
@@ -106,15 +106,13 @@ public class OscSkeletonRenderer : MonoBehaviour
                     }
 
                     // the Astra SDK uses a different vector class than Unity
-                    skeletonJoint.transform.localPosition =
-                        new Vector3(bodyJoint.WorldPosition.X / 1000f,
-                                    bodyJoint.WorldPosition.Y / 1000f,
-                                    bodyJoint.WorldPosition.Z / 1000f);
+                    skeletonJoint.transform.localPosition = new Vector3(bodyJoint.WorldPosition.X, bodyJoint.WorldPosition.Y, bodyJoint.WorldPosition.Z) * scaler;
 
                     // ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
                     OscMessage msg = new OscMessage();
                     msg.address = "/joint";
-                    msg.values.Add(bodyJoint.Type.ToString().ToLower());
+                    Debug.Log(bodyJoint.Type.ToString());
+                    msg.values.Add(orbbecToOpenniName(bodyJoint.Type.ToString()));
                     msg.values.Add((int) body.Id);
                     msg.values.Add(skeletonJoint.transform.localPosition.x);
                     msg.values.Add(skeletonJoint.transform.localPosition.y);
@@ -123,7 +121,7 @@ public class OscSkeletonRenderer : MonoBehaviour
                     // ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
 
                     // The original Osceleton didn't use rotation, but it can be calculated here
-
+                    /*
                     //skel.Joints[i].Orient.Matrix:
                     // 0, 			1,	 		2,
                     // 3, 			4, 			5,
@@ -148,6 +146,7 @@ public class OscSkeletonRenderer : MonoBehaviour
 
                     skeletonJoint.transform.rotation =
                         Quaternion.LookRotation(jointForward, jointUp);
+                    */
 
                     if (bodyJoint.Type == Astra.JointType.LeftHand)
                     {
@@ -164,6 +163,51 @@ public class OscSkeletonRenderer : MonoBehaviour
                 }
             }
         }
+    }
+
+    private string orbbecToOpenniName(string name) {
+        name = name.ToLower();
+        switch (name) {
+            case ("head"):
+                return "head";
+            case ("shoulderspine"):
+                return "neck";
+            case ("spine"): // <-- not openni
+                return "spine";
+            case ("basespine"):
+                return "torso";
+            //~
+            case ("rightshoulder"):
+                return "r_shoulder";
+            case ("rightelbow"):
+                return "r_elbow";
+            case ("rightwrist"): // <-- not openni
+                return "r_wrist";
+            case ("righthand"):
+                return "r_hand";
+            case ("righthip"):
+                return "r_hip";
+            case ("rightknee"):
+                return "r_knee";
+            case ("rightfoot"):
+                return "r_foot";
+            //~
+            case ("leftshoulder"):
+                return "l_shoulder";
+            case ("leftelbow"):
+                return "l_elbow";
+            case ("leftwrist"): // <-- not openni
+                return "l_wrist";
+            case ("lefthand"):
+                return "l_hand";
+            case ("lefthip"):
+                return "l_hip";
+            case ("leftknee"):
+                return "l_knee";
+            case ("leftfoot"):
+                return "l_foot";
+        }
+        return null;
     }
 
     private void UpdateHandPoseVisual(GameObject skeletonJoint, Astra.HandPose pose)
