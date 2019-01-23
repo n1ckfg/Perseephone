@@ -9,7 +9,8 @@ using System.Text;
 public class OscSkeletonRenderer : MonoBehaviour
 {
     public OSC osc;
-    public float scaler = 0.001f;
+	Vector3 offset = Vector3.zero;
+	Vector3 scaler = Vector3.one;
 
     public GameObject JointPrefab;
     public Transform JointRoot;
@@ -106,7 +107,7 @@ public class OscSkeletonRenderer : MonoBehaviour
                     }
 
                     // the Astra SDK uses a different vector class than Unity
-                    skeletonJoint.transform.localPosition = new Vector3(bodyJoint.WorldPosition.X, bodyJoint.WorldPosition.Y, bodyJoint.WorldPosition.Z) * scaler;
+                    skeletonJoint.transform.localPosition = new Vector3(bodyJoint.WorldPosition.X, bodyJoint.WorldPosition.Y, bodyJoint.WorldPosition.Z) / 1000f;
 
                     // ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
                     OscMessage msg = new OscMessage();
@@ -114,13 +115,14 @@ public class OscSkeletonRenderer : MonoBehaviour
                     Debug.Log(bodyJoint.Type.ToString());
                     msg.values.Add(orbbecToOpenniName(bodyJoint.Type.ToString()));
                     msg.values.Add((int) body.Id);
-                    msg.values.Add(skeletonJoint.transform.localPosition.x);
-                    msg.values.Add(skeletonJoint.transform.localPosition.y);
-                    msg.values.Add(skeletonJoint.transform.localPosition.z);
+					Vector3 pos = osceletonCoords(skeletonJoint.transform.localPosition);
+                    msg.values.Add(pos.x);
+                    msg.values.Add(pos.y);
+                    msg.values.Add(pos.z);
                     osc.Send(msg);
                     // ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
 
-                    // The original Osceleton didn't use rotation, but it can be calculated here
+                    // The original Osceleton could send rotation data too, but this wasn't often used
                     /*
                     //skel.Joints[i].Orient.Matrix:
                     // 0, 			1,	 		2,
@@ -164,6 +166,14 @@ public class OscSkeletonRenderer : MonoBehaviour
             }
         }
     }
+
+	// https://github.com/n1ckfg/OSCeleton/blob/master/src/OSCeleton.cpp
+	private Vector3 osceletonCoords(Vector3 pos) {
+		pos.x = offset.x + (scaler.x * (1280f - pos.x) / 2560f); //Normalize coords to 0..1 interval
+	  	pos.y = offset.y + (scaler.y * (960f - pos.y) / 1920f); //Normalize coords to 0..1 interval
+	  	pos.z = offset.z + (scaler.z * pos.z * 7.8125f / 10000f); //Normalize coords to 0..7.8125 interval
+		return pos;
+	}
 
     private string orbbecToOpenniName(string name) {
         name = name.ToLower();
