@@ -1,5 +1,8 @@
 import oscP5.*;
 import netP5.*;
+import peasy.*;
+
+PeasyCam cam;
 
 OscP5 oscP5;
 int receivePort = 7110;
@@ -9,11 +12,12 @@ String[] osceletonNames = {
 };
 
 ArrayList<Joint> joints = new ArrayList<Joint>();
-float scaler = 100.0;
+float scaler = 1.0;
 
 void setup() {
   size(800, 600, P3D);
   pixelDensity(displayDensity());
+  cam = new PeasyCam(this, 100);
   oscP5 = new OscP5(this, receivePort);
 
   for (int i=0; i<osceletonNames.length; i++) {
@@ -26,7 +30,7 @@ void draw() {
   for (int i=0; i<joints.size(); i++) {
     Joint joint = joints.get(i);
     pushMatrix();
-    translate(joint.co.x, joint.co.y, 0);//joint.co.z);
+    translate(joint.co.x, joint.co.y, 0);
     ellipse(0,0,20,20);
     popMatrix();
   }

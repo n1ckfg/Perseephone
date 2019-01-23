@@ -107,18 +107,20 @@ public class OscSkeletonRenderer : MonoBehaviour
                     }
 
                     // the Astra SDK uses a different vector class than Unity
-                    skeletonJoint.transform.localPosition = new Vector3(bodyJoint.WorldPosition.X, bodyJoint.WorldPosition.Y, bodyJoint.WorldPosition.Z) / 1000f;
-
+                    Vector3 pos = new Vector3(bodyJoint.WorldPosition.X, bodyJoint.WorldPosition.Y, bodyJoint.WorldPosition.Z);
+                    skeletonJoint.transform.localPosition = pos / 1000f;
+                    float x = remap(pos.x, -640f, 640f, 0f, 640f);
+                    float y = Mathf.Abs(480f - remap(pos.y, -480f, 480f, 0f, 480f));
+                    float z = pos.z;
+                    Debug.Log(x + ", " + y + ", " + z);
                     // ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
                     OscMessage msg = new OscMessage();
                     msg.address = "/joint";
-                    Debug.Log(bodyJoint.Type.ToString());
-                    msg.values.Add(orbbecToOpenniName(bodyJoint.Type.ToString()));
+                    msg.values.Add("" + orbbecToOpenniName(bodyJoint.Type.ToString()));
                     msg.values.Add((int) body.Id);
-					Vector3 pos = osceletonCoords(skeletonJoint.transform.localPosition);
-                    msg.values.Add(pos.x);
-                    msg.values.Add(pos.y);
-                    msg.values.Add(pos.z);
+                    msg.values.Add(x);
+                    msg.values.Add(y);
+                    msg.values.Add(z);
                     osc.Send(msg);
                     // ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
 
@@ -167,12 +169,17 @@ public class OscSkeletonRenderer : MonoBehaviour
         }
     }
 
-	// https://github.com/n1ckfg/OSCeleton/blob/master/src/OSCeleton.cpp
-	private Vector3 osceletonCoords(Vector3 pos) {
-		pos.x = offset.x + (scaler.x * (1280f - pos.x) / 2560f); //Normalize coords to 0..1 interval
-	  	pos.y = offset.y + (scaler.y * (960f - pos.y) / 1920f); //Normalize coords to 0..1 interval
-	  	pos.z = offset.z + (scaler.z * pos.z * 7.8125f / 10000f); //Normalize coords to 0..7.8125 interval
-		return pos;
+    float remap(float s, float a1, float a2, float b1, float b2) {
+        return b1 + (s - a1) * (b2 - b1) / (a2 - a1);
+    }
+
+    // https://github.com/n1ckfg/OSCeleton/blob/master/src/OSCeleton.cpp
+    private Vector3 osceletonCoords(Vector3 pos) {
+		float x = offset.x + (scaler.x * (1280f - pos.x) / 2560f); //Normalize coords to 0..1 interval
+	  	float y = offset.y + (scaler.y * (960f - pos.y) / 1920f); //Normalize coords to 0..1 interval
+	  	float z = offset.z + (scaler.z * pos.z * 7.8125f / 10000f); //Normalize coords to 0..7.8125 interval
+        Vector3 newPos = new Vector3(x, y, z);
+        return newPos;
 	}
 
     private string orbbecToOpenniName(string name) {
@@ -217,7 +224,7 @@ public class OscSkeletonRenderer : MonoBehaviour
             case ("leftfoot"):
                 return "l_foot";
         }
-        return null;
+        return "torso";
     }
 
     private void UpdateHandPoseVisual(GameObject skeletonJoint, Astra.HandPose pose)
