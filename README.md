@@ -1,6 +1,6 @@
 # Perseephone
 
-Send Osceleton format skeleton data from Orbbec Persee over OSC.
+Send Osceleton format skeleton data from Orbbec Persee over OSC. Uses Orbbec Body Tracking but could be easily modified to work with Nuitrack, etc.
 
 <pre>
 Joint names (15) are:
