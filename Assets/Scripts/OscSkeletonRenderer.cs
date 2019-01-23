@@ -1,9 +1,18 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
 using System.Collections.Generic;
+using System;
+using System.Net;
+using System.Collections;
+using System.Text;
+using UnityOSC;
 
 public class OscSkeletonRenderer : MonoBehaviour
 {
+    public string outIP = "127.0.0.1";
+    public int outPort = 7110;
+    private OSCServer myServer;
+
     private long _lastFrameIndex = -1;
 
     public Astra.Body[] _bodies;
@@ -36,6 +45,9 @@ public class OscSkeletonRenderer : MonoBehaviour
     {
         _bodySkeletons = new Dictionary<int, GameObject[]>();
         _bodies = new Astra.Body[Astra.BodyFrame.MaxBodies];
+
+        OSCHandler.Instance.Init();
+        OSCHandler.Instance.CreateClient("myClient", IPAddress.Parse(outIP), outPort);
     }
 
     public void OnNewFrame(Astra.BodyStream bodyStream, Astra.BodyFrame frame)
@@ -99,10 +111,24 @@ public class OscSkeletonRenderer : MonoBehaviour
                         skeletonJoint.SetActive(true);
                     }
 
+                    // the Astra SDK uses a different vector class than Unity
                     skeletonJoint.transform.localPosition =
                         new Vector3(bodyJoint.WorldPosition.X / 1000f,
                                     bodyJoint.WorldPosition.Y / 1000f,
                                     bodyJoint.WorldPosition.Z / 1000f);
+
+                    // ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
+                    OSCMessage msg = new OSCMessage("/joint");
+                    //msg.Append(bodyJoint.Type.ToString());
+                    //msg.Append((int) body.Id);
+                    //msg.Append(skeletonJoint.transform.localPosition.x);
+                    //msg.Append(skeletonJoint.transform.localPosition.y);
+                    //msg.Append(skeletonJoint.transform.localPosition.z);
+
+                    //OSCHandler.Instance.SendMessageToClient("myClient", msg.Address, msg);
+                    // ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
+
+                    // The original Osceleton didn't use rotation, but it can be calculated here
 
                     //skel.Joints[i].Orient.Matrix:
                     // 0, 			1,	 		2,
