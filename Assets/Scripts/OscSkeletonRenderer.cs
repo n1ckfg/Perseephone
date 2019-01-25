@@ -152,6 +152,7 @@ public class OscSkeletonRenderer : MonoBehaviour
                         Quaternion.LookRotation(jointForward, jointUp);
                     */
 
+                    /*
                     if (bodyJoint.Type == Astra.JointType.LeftHand)
                     {
                         UpdateHandPoseVisual(skeletonJoint, body.HandPoseInfo.LeftHand);
@@ -160,6 +161,7 @@ public class OscSkeletonRenderer : MonoBehaviour
                     {
                         UpdateHandPoseVisual(skeletonJoint, body.HandPoseInfo.RightHand);
                     }
+                    */
                 }
                 else
                 {

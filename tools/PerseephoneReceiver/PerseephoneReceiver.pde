@@ -17,7 +17,7 @@ float scaler = 1.0;
 void setup() {
   size(800, 600, P3D);
   pixelDensity(displayDensity());
-  cam = new PeasyCam(this, 100);
+  cam = new PeasyCam(this, 500);
   oscP5 = new OscP5(this, receivePort);
 
   for (int i=0; i<osceletonNames.length; i++) {
